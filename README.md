@@ -1,28 +1,6 @@
 # Tufte in Python
 
-See the [Jupyter notebook](https://github.com/juanshishido/tufte/blob/master/tufte-in-python.ipynb) for more details.
+Gradually-expanding plotting library taking aesthetic inspiration from Edward Tufte, cloned from [here](https://github.com/juanshishido/tufte). Built on top of Matplotlib but hopefully less eye-gougingly ugly and painful to work with.
 
-A set of four plots based on Edward R. Tufte's designs in _The Visual Display of Quantitative Information_:
+Packaged with the webfont version of the typeface used in Edward Tufte’s books, taken from [this repo](https://github.com/edwardtufte/et-book). Regular, bold and italic variants are included; all should be installed before using the library.
 
-* bar
-* boxplot
-* line
-* scatter
-
-All of these plots aim to maximize _data-ink_, the "non-erasable core of a graphic." 
-
-![bar](/images/bar.png)
-
-The "boxplot" (`bplot`), for example, removes boxes and caps and simply shows a dot between two lines. The dot represents the median and the lines correspond to the top and bottom 25% of the data. The empty space between the lines is the interquartile range.
-
-![bplot](/images/bplot.png)
-
-The line and scatter plots make use of Tufte's _range-frame_ concept, which aims to make the frame (axis) lines "effective data-communicating element[s]" by showing the minimum and maximum values in each axis. The default line style uses a circle marker with gaps between line segments.
-
-![line](/images/line.png)
-
-![scatter](/images/scatter.png)
-
-This is built on top of `matplotlib`. This means other functions or methods can be used in conjunction with `tufte` plots.
-
-Note: plots shown for demonstration purposes only, thus no titles or axis labels are used.

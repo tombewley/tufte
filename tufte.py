@@ -1,28 +1,31 @@
 import warnings
-
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
+"""
+TODO: Reformulate this whole thing as a class with methods for styling that can then be applied to multiple plots. 
+TODO: Backup fonts if ETBembo not installed.
+      Use matplotlib.font_manager.fontManager.ttflist to check.
+"""
 
-# mpl.rc("savefig", dpi=200)
-params = {#'figure.dpi' : 200,
-          'figure.facecolor' : 'white',
-          'axes.axisbelow' : True,
-          'font.family' : 'serif',
-          'font.serif' : 'Bitstream Vera Serif, New Century Schoolbook, Century Schoolbook L,\
-                          Utopia, ITC Bookman, Bookman, Nimbus Roman No9 L, Times New Roman,\
-                          Times, Palatino, Charter, serif',
-          'lines.antialiased' : True,
-          'savefig.facecolor' : 'white'}
+axis_tick_font = {'fontname':'ETBembo','fontweight':'roman','fontsize':10}
+axis_label_font = {'fontname':'ETBembo','fontweight':'roman','fontsize':10}
+annotation_font = {'fontname':'ETBookOT','fontweight':'regular','fontsize':10}
+title_font = {'fontname':'ETBembo','fontweight':'700','fontsize':16}
 
-for (k, v) in params.iteritems():
+rcParams = {#'figure.dpi' : 200,
+           'figure.facecolor' : 'white',
+           'axes.axisbelow' : True,
+           'lines.antialiased' : True,
+           'savefig.facecolor' : 'white'}
+
+for (k, v) in rcParams.items():
     plt.rcParams[k] = v
 
-
 def plot_style(ax, plot_type):
-    ax.tick_params(axis='both', top='off', bottom='off', left='off', right='off', colors='#4B4B4B', pad=10)
+    ax.tick_params(axis='both', bottom=True, left=True, top=False, right=False, colors='#4B4B4B', pad=10)
     ax.xaxis.label.set_color('#4B4B4B')
     ax.yaxis.label.set_color('#4B4B4B')
     ax.spines['top'].set_visible(False)
@@ -67,7 +70,7 @@ def convert_ticks(data, labels):
         labels = cast_to('float', labels)
     return labels
 
-def range_frame(fontsize, ax, x=None, y=None, dimension='both', is_bar=False):
+def range_frame(ax, x=None, y=None, dimension='both', is_bar=False):
     PAD = 0.05
     if dimension in ('x', 'both'):
         assert x is not None, 'Must pass in x value'
@@ -81,7 +84,7 @@ def range_frame(fontsize, ax, x=None, y=None, dimension='both', is_bar=False):
         xlabels = [xmin] + xlabels + [xmax]
         xlabels = convert_ticks(x, xlabels)
         ax.set_xticks(xlabels)
-        ax.set_xticklabels(xlabels, fontsize=fontsize)
+        ax.set_xticklabels(xlabels, **axis_tick_font)
     if dimension in ('y', 'both'):
         assert y is not None, 'Must pass in y value'
         ymin = y.min().min()
@@ -100,7 +103,7 @@ def range_frame(fontsize, ax, x=None, y=None, dimension='both', is_bar=False):
             ylabels = [ymin] + ylabels + [ymax]
         ylabels = convert_ticks(y, ylabels)
         ax.set_yticks(ylabels)
-        ax.set_yticklabels(ylabels, fontsize=fontsize)
+        ax.set_yticklabels(ylabels, **axis_tick_font)
     return ax
 
 def auto_rotate_xticklabel(fig, ax):
@@ -118,12 +121,12 @@ def auto_rotate_xticklabel(fig, ax):
     return fig, ax
 
 def to_nparray(container):
-    if type(container) in (list, pd.core.index.Int64Index, pd.Series):
+    if type(container) in (list, pd.Int64Index, pd.Series):
         container = np.array(container)
     elif type(container) is np.ndarray:
         pass
     else:
-        raise TypeError('Container must be of type: list, np.ndarray, pd.core.index.Int64Index, or pd.Series')
+        raise TypeError('Container must be of type: list, np.ndarray, pd.Int64Index, or pd.Series')
     return container
 
 def check_df(x, y, df):
@@ -148,15 +151,15 @@ def check_valid(data):
     else:
         return False
 
-def scatter(x, y, df=None, figsize=(16, 8), marker='o', s=25, color='black', edgecolor='none', alpha=0.9, ticklabelsize=10):
+def scatter(x, y, df=None, figsize=(16, 8), marker='o', s=25, color='black', edgecolor='none', alpha=0.9):
     x, y = check_df(x, y, df)
     fig, ax = plt.subplots(figsize=figsize)
     plot_style(ax, plot_type='scatter')
     ax.scatter(x, y, marker=marker, s=s, color=color, edgecolor=edgecolor, alpha=alpha)
-    ax = range_frame(ticklabelsize, ax, x, y, dimension='both')
+    ax = range_frame(ax, x, y, dimension='both')
     return fig, ax
 
-def line(x, y, df=None, figsize=(16, 8), linestyle='tufte', linewidth=1.0, color='black', alpha=0.9, ticklabelsize=10, markersize=10, **kwargs):
+def line(x, y, df=None, figsize=(16, 8), linestyle='tufte', linewidth=1.0, color='black', alpha=0.9, markersize=10, **kwargs):
     x, y = check_df(x, y, df)
     fig, ax = plt.subplots(figsize=figsize)
     plot_style(ax, plot_type='line')
@@ -169,10 +172,10 @@ def line(x, y, df=None, figsize=(16, 8), linestyle='tufte', linewidth=1.0, color
         ax.scatter(x, y, marker=marker, s=markersize, color=color, zorder=3)
     else:
         ax.plot(x, y, linestyle=linestyle, linewidth=linewidth, color=color, alpha=alpha, markersize=markersize ** 0.5, **kwargs)
-    ax = range_frame(ticklabelsize, ax, x, y, dimension='both')
+    ax = range_frame(ax, x, y, dimension='both')
     return fig, ax
 
-def bar(position, height, df=None, label=None, figsize=(16, 8), align='center', color='LightGray', edgecolor='none', width=0.5, gridcolor='white', ticklabelsize=10):
+def bar(position, height, df=None, label=None, figsize=(16, 8), align='center', color='LightGray', edgecolor='none', width=0.5, gridcolor='white'):
     position, height = check_df(position, height, df)
     fig, ax = plt.subplots(figsize=figsize)
     plot_style(ax, plot_type='bar')
@@ -205,10 +208,10 @@ def bar(position, height, df=None, label=None, figsize=(16, 8), align='center', 
             raise ValueError('Labels must have the same first dimension as position and height')
     else:
         raise ValueError('Labels must be in: list, np.ndarray, or pd.Series')
-    ax = range_frame(ticklabelsize, ax, x=None, y=height, dimension='y', is_bar=True)
+    ax = range_frame(ax, x=None, y=height, dimension='y', is_bar=True)
     return fig, ax
 
-def bplot(x, figsize=(16, 8), auto_figsize=True, ticklabelsize=10):
+def bplot(x, figsize=(16, 8), auto_figsize=True):
     if check_valid(x):
         fig, ax = plt.subplots(figsize=figsize)
         plot_style(ax, plot_type='bplot')
@@ -249,5 +252,7 @@ def bplot(x, figsize=(16, 8), auto_figsize=True, ticklabelsize=10):
         ax.set_ylim(xmin - x_range * 0.05, xmax + x_range * 0.05)
     else:
         raise TypeError('x must be type: list, np.ndarray, pd.Series, or pd.DataFrame')
-    ax = range_frame(ticklabelsize, ax, x=None, y=x, dimension='y')
+    ax = range_frame(ax, x=None, y=x, dimension='y')
     return fig, ax
+
+def show(): plt.show()
